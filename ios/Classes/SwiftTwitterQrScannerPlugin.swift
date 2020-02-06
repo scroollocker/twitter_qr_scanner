@@ -3,9 +3,10 @@ import UIKit
 
 public class SwiftTwitterQrScannerPlugin: NSObject, FlutterPlugin {
   public static func register(with registrar: FlutterPluginRegistrar) {
-    let channel = FlutterMethodChannel(name: "twitter_qr_scanner", binaryMessenger: registrar.messenger())
-    let instance = SwiftTwitterQrScannerPlugin()
-    registrar.addMethodCallDelegate(instance, channel: channel)
+    registrar.register(
+      QRViewFactory(withRegistrar: registrar),
+      withId: "com.anka.twitter_qr_scanner/qrview"
+    )
   }
 
   public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
