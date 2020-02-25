@@ -7,41 +7,40 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
-
 typedef void QRViewCreatedCallback(QRViewController controller);
 
 class QRView extends StatefulWidget {
   const QRView({
     @required Key key,
-    @required this.onQRViewCreated,    
+    @required this.onQRViewCreated,
     this.overlay,
     this.onFlashLightTap,
-
+    this.infoText,
     this.switchButtonColor = Colors.white,
-
   })  : assert(key != null),
-        assert(onQRViewCreated != null),        
+        assert(onQRViewCreated != null),
         super(key: key);
 
   final QRViewCreatedCallback onQRViewCreated;
 
   final ShapeBorder overlay;
-  
+
   final Color switchButtonColor;
   final VoidCallback onFlashLightTap;
+
+  final String infoText;
 
   @override
   State<StatefulWidget> createState() => _QRViewState();
 }
 
 class _QRViewState extends State<QRView> {
-
   void _onTap() {
     if (widget.onFlashLightTap != null) {
       widget.onFlashLightTap();
     }
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return Stack(
@@ -49,31 +48,59 @@ class _QRViewState extends State<QRView> {
         _getPlatformQrView(),
         widget.overlay != null
             ? Container(
-            alignment: Alignment.center,
-            decoration: ShapeDecoration(
-              shape: widget.overlay,
-            ),
-          )
+                alignment: Alignment.center,
+                decoration: ShapeDecoration(
+                  shape: widget.overlay,
+                ),
+              )
             : Container(),
         Align(
           alignment: Alignment.topLeft,
           child: SafeArea(
               child: IconButton(
-                icon: Icon(
-                  Icons.clear,
-                  color: Colors.white70,
-                ),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              )),
+            icon: Icon(
+              Icons.clear,
+              color: Colors.white70,
+            ),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          )),
         ),
-        widget.onFlashLightTap != null ? Positioned(
-          left: 0,
-          right: 0,          
-          bottom: 16,
-          child: IconButton(color: Colors.white, onPressed: () => _onTap(), icon: Icon(Icons.lightbulb_outline, color: Colors.white,),)
-        ) : SizedBox(height: 0,width: 0,)
+        widget.infoText != null
+            ? Align(
+                alignment: Alignment.topCenter,
+                child: SafeArea(
+                    child: Padding(
+                  padding: EdgeInsets.only(top: 70),
+                  child: Text(
+                    widget.infoText,
+                    style: TextStyle(color: Colors.white70, fontSize: 16),
+                    textAlign: TextAlign.center,
+                  ),
+                )),
+              )
+            : SizedBox(
+                height: 0,
+                width: 0,
+              ),
+        widget.onFlashLightTap != null
+            ? Positioned(
+                left: 0,
+                right: 0,
+                bottom: 16,
+                child: IconButton(
+                  color: Colors.white,
+                  onPressed: () => _onTap(),
+                  icon: Icon(
+                    Icons.lightbulb_outline,
+                    color: Colors.white,
+                  ),
+                ))
+            : SizedBox(
+                height: 0,
+                width: 0,
+              )
       ],
     );
   }
@@ -102,7 +129,7 @@ class _QRViewState extends State<QRView> {
     return _platformQrView;
   }
 
-  void _onPlatformViewCreated(int id) async{
+  void _onPlatformViewCreated(int id) async {
     if (widget.onQRViewCreated == null) {
       return;
     }
@@ -148,7 +175,7 @@ class QRViewController {
           {"width": renderBox.size.width, "height": renderBox.size.height});
     }
     _channel.setMethodCallHandler(
-          (MethodCall call) async {
+      (MethodCall call) async {
         switch (call.method) {
           case scanMethodCall:
             if (call.arguments != null) {
